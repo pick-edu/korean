@@ -6,8 +6,46 @@
     <title>PICK: Грант в Корею. Программа подготовки к поступлению</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+
+        if (firebaseConfig) {
+            setLogLevel('Debug');
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Authentication logic
+            (async () => {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        // console.log("Firebase signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        // console.log("Firebase signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                }
+            })();
+        } else {
+            console.warn("Firebase config not available. Running in static mode.");
+        }
+    </script>
+
     <style>
-        /* Custom CSS to match the deep black/blue block style from the PDF */
+        /* Custom CSS to match the deep black/blue block style */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #101010; /* Very deep dark background, nearly black */
@@ -67,23 +105,7 @@
             border: 1px solid #374151;
             padding: 1.5rem;
             border-radius: 0.75rem;
-            text-align: left; /* Ensure text alignment is left for the response */
         }
-        .modal-input-style {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            color: #1f2937;
-            background-color: #ffffff;
-            transition: border-color 0.15s, box-shadow 0.15s;
-        }
-        .modal-input-style:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
-
         /* Spinner for loading state */
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
@@ -96,32 +118,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        /* Style for Markdown Headings and lists in the output */
-        #resultOutput h2 {
-            font-size: 1.5rem; /* Equivalent to text-2xl */
-            font-weight: 700; /* Equivalent to font-bold */
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #3b82f6; /* Blue heading for structure */
-        }
-        #resultOutput ul {
-            list-style-type: disc;
-            margin-left: 1.5rem;
-            padding-left: 0;
-            margin-bottom: 1rem;
-        }
-        #resultOutput p {
-            margin-bottom: 1rem;
-            line-height: 1.6;
-        }
-
-        /* Mobile adjustment */
-        @media (max-width: 640px) {
-            .hero-text-container {
-                padding-top: 4rem;
-                padding-bottom: 6rem;
-            }
         }
     </style>
 </head>
@@ -136,12 +132,12 @@
             <nav class="space-x-6 hidden sm:block font-medium">
                 <a href="#process" class="text-white hover:text-blue-400 transition">Процесс</a>
                 <a href="#ai-coordinator" class="text-white hover:text-blue-400 transition">AI-Координатор 🎯</a>
-                <a href="#prize" class="text-white hover:text-blue-400 transition">Бесплатные Авиабилеты ✈️</a>
-                <a href="#contacts" class="text-white hover:text-blue-400 transition">Контакты</a>
+                <a href="#prize" class="text-white hover:text-blue-400 transition">Авиабилеты ✈️</a>
             </nav>
-            <button id="navOpenModalBtn" class="px-5 py-2 cta-button text-sm rounded-lg shadow-md hidden sm:block">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfVxNrfayVQuPa5MRNCPeyZI9GVcbfDg0KitNgAwAT3CkEiCw/viewform?usp=dialog" target="_blank" 
+               class="px-5 py-2 cta-button text-sm rounded-lg shadow-md hidden sm:block flex items-center justify-center">
                 Записаться
-            </button>
+            </a>
             <button class="sm:hidden text-2xl text-white">☰</button>
         </div>
     </header>
@@ -156,9 +152,11 @@
                 Твой путь к <strong>100% гранту</strong>. Не просто консультации, а полноценная 2-х годовая программа с индивидуальным подходом.
             </p>
             <div class="space-y-4 sm:space-y-0 sm:space-x-6">
-                <button id="heroOpenModalBtn" class="cta-button inline-block px-10 py-3 text-lg font-bold rounded-lg shadow-lg uppercase tracking-wider">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfVxNrfayVQuPa5MRNCPeyZI9GVcbfDg0KitNgAwAT3CkEiCw/viewform?usp=dialog" target="_blank" 
+                   class="cta-button inline-block px-10 py-3 text-lg font-bold rounded-lg shadow-lg uppercase tracking-wider flex items-center justify-center">
                     Сделать первый шаг
-                </button>
+                </a>
+                
                 <a href="#process" class="secondary-cta inline-block px-10 py-3 text-lg font-bold rounded-lg shadow-lg uppercase tracking-wider text-black">
                     Узнать подробнее
                 </a>
@@ -172,43 +170,43 @@
     <section id="process" class="py-16 md:py-24 bg-black">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold mb-12 section-heading mx-auto">
-                Процесс работы с PICK
+                Основа Программы PICK
             </h2>
             <p class="mb-12 max-w-3xl mx-auto text-gray-400">
-                PICK — это не просто консультации, это тщательно разработанная 2-х годовая программа с индивидуальным подходом для обеспечения <strong>качественного результата</strong>.
+                PICK — это тщательно разработанный 2-х годовой план, который начинается с языковой подготовки и заканчивается стратегической подачей документов.
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 <div class="process-card p-6 text-left">
                     <div class="step-number text-5xl font-extrabold mb-3">1</div>
-                    <h3 class="text-xl font-bold mb-3 text-white">TOPIK: Корейский Язык</h3>
+                    <h3 class="text-xl font-bold mb-3 text-white">Обучение Корейскому и TOPIK</h3>
                     <p class="text-gray-400 text-sm">
-                        Гарантия гранта основана на знании корейского языка. <strong>Первый шаг</strong> — изучение языка и подготовка к экзамену TOPIK (уровень 3-4).
+                        Начинаем с нуля и доводим до уровня TOPIK 4-6. Наша цель — не только сертификат, но и свободное владение языком для успешной академической жизни.
                     </p>
                 </div>
 
                 <div class="process-card p-6 text-left">
                     <div class="step-number text-5xl font-extrabold mb-3">2</div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Работа над Профайлом</h3>
+                    <h3 class="text-xl font-bold mb-3 text-white">Развитие Внешкольного Профайла</h3>
                     <p class="text-gray-400 text-sm">
-                        Университеты выбирают тех, кто активен. <strong>Второй шаг</strong>: внешкольная работа над профайлом для обеспечения наилучшего результата.
+                        Второй шаг: индивидуальная работа над профайлом, чтобы создать яркое досье. Мы помогаем с волонтёрством, сбором сертификатов и участием в олимпиадах.
                     </p>
                 </div>
 
                 <div class="process-card p-6 text-left">
                     <div class="step-number text-5xl font-extrabold mb-3">3</div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Мотивационное Письмо &amp; Интервью</h3>
+                    <h3 class="text-xl font-bold mb-3 text-white">Идеальное Эссе и Интервью</h3>
                     <p class="text-gray-400 text-sm">
-                        Университет встречает студентов по письму. <strong>Третий шаг</strong>: написание мотивационного письма, стади плана и последующая подготовка к интервью.
+                        Разработка убедительного мотивационного письма и учебного плана. Третий шаг: подготовка к интервью, чтобы студент уверенно доказал свою ценность приемной комиссии.
                     </p>
                 </div>
 
                 <div class="process-card p-6 text-left">
                     <div class="step-number text-5xl font-extrabold mb-3">4</div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Подача в Университеты</h3>
+                    <h3 class="text-xl font-bold mb-3 text-white">Стратегическая Подача</h3>
                     <p class="text-gray-400 text-sm">
-                        Чем больше вузов, тем выше шансы. <strong>Четвертый шаг</strong>: обучение всему процессу подачи через специальные сайты и выбор самого выгодного гранта.
+                        Четвертый шаг: обучение правильному сбору документов и подаче заявлений (онлайн/офлайн) в несколько ВУЗов для выбора самого выгодного гранта.
                     </p>
                 </div>
             </div>
@@ -218,37 +216,37 @@
     <section id="ai-coordinator" class="py-16 md:py-24 bg-[#1f2937]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-heading mx-auto">
-                AI-Координатор: Оценка Шансов на Грант 🎯
+                AI-Координатор: Реалистичный Анализ Гранта 🎯
             </h2>
-            <div class="bg-black p-8 rounded-xl shadow-2xl border-2 border-blue-600 space-y-6">
+            <div class="bg-[#1f2937] p-8 rounded-xl shadow-2xl border-2 border-blue-600 space-y-6">
                 <p class="text-gray-300 text-center">
-                    Введите ваши текущие данные, чтобы получить **реалистичную оценку** шансов на грант и индивидуальный план повышения результата с программой PICK.
+                    Введите ваши текущие данные, чтобы получить реалистичный анализ шансов на стипендию.
                 </p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <input type="text" id="targetMajor" placeholder="Желаемая Специальность (напр., Computer Science)" class="input-style" required>
-                    <input type="text" id="currentTOPIK" placeholder="Текущий уровень TOPIK (напр., 3 или 0)" class="input-style" required>
+                    <input type="text" id="currentTOPIK" placeholder="Текущий уровень TOPIK (напр., 5 или 6)" class="input-style" required>
                 </div>
-                <textarea id="currentGPA" placeholder="Средний балл (GPA) из аттестата/транскрипта (напр., 4.7/5.0)" rows="1" class="input-style resize-none" required></textarea>
-                <textarea id="currentAchievements" placeholder="Ключевые достижения (напр., призер олимпиады, волонтерство, спорт, опыт работы)" rows="3" class="input-style resize-none" required></textarea>
+                <textarea type="text" id="currentGPA" placeholder="Средний балл (GPA) из аттестата/транскрипта (напр., 4.7/5.0)" rows="1" class="input-style resize-none" required></textarea>
+                <textarea id="currentAchievements" placeholder="Ключевые достижения, внеклассная деятельность, награды (ВАЖНО!)" rows="3" class="input-style resize-none" required></textarea>
 
                 <button id="evaluateButton" class="cta-button w-full px-8 py-3 rounded-lg uppercase tracking-wider disabled:opacity-50 flex items-center justify-center">
-                    <span id="buttonText">Оценить шансы и получить план</span>
+                    <span id="buttonText">Получить Реалистичный Анализ</span>
                     <div id="loader" class="hidden ml-3 spinner"></div>
                 </button>
                 
                 <div id="resultOutputContainer" class="mt-6 p-6 result-card hidden border-blue-400">
-                    <h4 class="text-2xl font-bold text-blue-400 mb-4">Результаты Оценки:</h4>
+                    <h4 class="text-2xl font-bold text-blue-400 mb-4">Анализ AI-Координатора:</h4>
                     <div id="resultOutput" class="text-gray-200 whitespace-pre-wrap leading-relaxed"></div>
                     <p class="mt-6 text-sm italic text-gray-500">
-                        *Для получения полного индивидуального плана и гарантированного сопровождения запишитесь на **бесплатную консультацию** ниже.
+                        <strong>Этот анализ</strong> основан на исторических данных. Для получения **гарантированного сопровождения** и индивидуальной стратегии, запишитесь на консультацию.
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="prize" class="py-16 md:py-24 bg-black">
+    <section id="prize" class="py-16 md:py-24 bg-[#101010]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-heading mx-auto">
                 Бесплатные Авиабилеты: Шанс для Топ-Студентов ✈️
@@ -256,13 +254,16 @@
             
             <div class="flex flex-col md:flex-row items-stretch bg-[#1f2937] p-6 md:p-10 rounded-lg shadow-2xl border-2 border-blue-500">
                 
-                <div class="md:w-1/2 md:pr-10 mb-6 md:mb-0">
+                <div class="md:w-full md:pr-10 mb-6 md:mb-0">
                     <h3 class="text-3xl font-extrabold text-blue-400 mb-4 flex items-center">
                         <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 15.938v-3.876h2v3.876H11zm0-4.876V6.062h2v7.001H11z"/></svg>
-                        100% Оплата Авиабилетов для Топ-3
+                        Перелет в Корею: Бонус за 100% Грант!
                     </h3>
+                    <p class="text-lg text-yellow-400 font-semibold mb-4">
+                        Получите <strong class="text-white">ОПЛАЧЕННЫЙ АВИАБИЛЕТ</strong> от PICK! Студенты, <strong class="underline">зарегистрировавшиеся до 31 ОКТЯБРЯ</strong> и вошедшие в тройку лучших (<strong class="text-blue-300">Топ-3</strong>) по результатам поступления на 100% грант, получат наш специальный спонсорский бонус.
+                    </p>
                     <p class="text-lg text-gray-300 mb-6">
-                        Мы поощряем выдающиеся успехи. **PICK спонсирует авиабилеты** для **трех лучших студентов** каждого семестра, которые добились 100% гранта в топовых университетах.
+                        Мы ценим стремление к совершенству. PICK спонсирует авиабилеты для трех самых успешных студентов каждого семестра, которые добились максимального 100% гранта в топовых университетах Кореи.
                     </p>
                     <ul class="space-y-3 text-gray-300">
                         <li class="flex items-center">
@@ -272,27 +273,6 @@
                         <li class="flex items-center">
                             <span class="text-blue-400 text-2xl mr-3 flex-shrink-0">🚀</span>
                             <span class="font-medium">Билеты на перелет в Корею **БЕСПЛАТНО** за счет PICK.</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="md:w-1/2 bg-[#101010] p-6 rounded-lg border border-gray-700 shadow-inner">
-                    <h4 class="text-xl font-bold text-white mb-4">Детали Гранта Университета:</h4>
-                    <p class="text-gray-400 mb-4">
-                        Наша программа направлена на получение <strong>полного гранта</strong> от самого университета, который включает:
-                    </p>
-                    <ul class="space-y-3 text-gray-400">
-                        <li class="flex items-start">
-                            <span class="text-blue-500 font-bold text-lg mr-2 flex-shrink-0">✅</span>
-                            <span>Покрытие <strong>100% стоимости обучения</strong> (4 года).</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 font-bold text-lg mr-2 flex-shrink-0">✅</span>
-                            <span>Ежемесячная **стипендия** на проживание и питание (зависит от вуза).</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 font-bold text-lg mr-2 flex-shrink-0">✅</span>
-                            <span>Полное сопровождение в оформлении визы D-4 / D-2.</span>
                         </li>
                     </ul>
                 </div>
@@ -308,18 +288,19 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="process-card p-6 border-t-4 border-blue-500">
-                    <p class="italic text-gray-300 mb-4">"Благодаря PICK я поступила в университет <strong>Yonsei</strong>! Четкий план по TOPIK и профайлу был решающим. Это лучшая инвестиция в мое будущее."</p>
-                    <p class="font-semibold text-white">— Диана, 17 лет, Алматы</p>
+                    <p class="italic text-gray-300 mb-4">"Когда я только узнала о программе PICK, даже не могла представить, насколько сильно она изменит мою жизнь. За два года я не только улучшила свой корейский и прошла серьезную подготовку, но и поняла, в каком направлении хочу развиваться. Благодаря поддержке кураторов и преподавателей, я смогла поступить в K-ARTS – вуз моей мечты – и получить полную стипендию на одном из самых конкурентных направлений. Я безмерно благодарна всей команде PICK и Диане за веру в меня и за ту невероятную возможность, которую они мне дали."</p>
+                    <p class="font-semibold text-white">— Карина, 17 лет, г. Алматы. Поступила в K-ARTS (Сеул), специальность – арт-менеджмент. Самая престижная стипендия.</p>
+
                 </div>
 
                 <div class="process-card p-6 border-t-4 border-blue-500">
-                    <p class="italic text-gray-300 mb-4">"Сначала я думал, что сам справлюсь. Но помощь с мотивационным письмом и интервью от PICK дала мне <strong>100% уверенность</strong>. Теперь я в Сеуле!"</p>
-                    <p class="font-semibold text-white">— Арман, 18 лет, Нур-Султан</p>
+                    <p class="italic text-gray-300 mb-4">"Программа PICK стала для меня настоящим трамплином. Я всегда интересовался IT, но не знал, с чего начать, и не верил, что реально поступить за границу на полную стипендию. Благодаря PICK я систематизировал знания, подтянул язык и научился правильно подавать себя на международном уровне. Поступление в Inha University на 100% стипендию – это результат не только моего труда, но и той огромной поддержки, которую я получил в PICK."</p>
+                    <p class="font-semibold text-white">— Азамат, 18 лет, г. Астана. Поступил в Inha University (Южная Корея), специальность – информационные технологии. 100% стипендия на 4 года.</p>
                 </div>
 
                 <div class="process-card p-6 border-t-4 border-blue-500">
-                    <p class="italic text-gray-300 mb-4">"Уроки корейского были максимально адаптированы под сдачу <strong>TOPIK 4</strong>. Это ускорило мой процесс в разы. Рекомендую всем, кто ищет грант!"</p>
-                    <p class="font-semibold text-white">— Жанна, 16 лет, Астана</p>
+                    <p class="italic text-gray-300 mb-4">"С самого детства я мечтала стать врачом, но обучение за границей казалось чем-то недостижимым, тем более в Корее. PICK изменил это. Здесь я получила не только академическую подготовку, но и уверенность в себе. Каждое занятие, консультации, подготовка к собеседованиям – всё это сыграло ключевую роль. Сейчас я начинаю обучение в медицинском университете в Южной Корее, и моя мечта становится реальностью. Я искренне благодарна команде PICK за их профессионализм и человечность."</p>
+                    <p class="font-semibold text-white">— Милана, 17 лет, г. Актобе. Поступила в Ulsan University, специальность – медицина. 100% стипендия.</p>
                 </div>
             </div>
         </div>
@@ -334,12 +315,10 @@
                 Запишитесь, чтобы составить индивидуальный план поступления и узнать свой реальный шанс на грант.
             </p>
             <div class="max-w-md mx-auto">
-                 <button id="footerOpenModalBtn" class="cta-button w-full sm:w-auto px-8 py-3 rounded-lg uppercase tracking-wider">
+                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSfVxNrfayVQuPa5MRNCPeyZI9GVcbfDg0KitNgAwAT3CkEiCw/viewform?usp=dialog" target="_blank"
+                    class="cta-button w-full sm:w-auto px-8 py-3 rounded-lg uppercase tracking-wider flex items-center justify-center">
                     Записаться сейчас
-                </button>
-                <p class="mt-3 text-sm italic opacity-80">
-                    Количество мест на бесплатную консультацию ограничено.
-                </p>
+                </a>
             </div>
         </div>
     </section>
@@ -353,223 +332,179 @@
             </div>
 
             <div class="flex space-x-6 text-xl">
-                <a href="#" class="hover:text-white transition" aria-label="Instagram">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.254.15 4.79 1.488 4.95 4.95.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.16 3.461-1.7 4.798-4.95 4.95-1.265.058-1.645.068-4.849.068-3.205 0-3.584-.012-4.849-.069-3.253-.15-4.79-1.488-4.95-4.95-.058-1.265-.068-1.644-.068-4.849 0-3.204.012-3.584.069-4.849.16-3.461 1.7-4.798 4.95-4.95 1.265-.058 1.644-.068 4.849-.068zM12 4.098c-3.176 0-3.57.012-4.802.069-2.903.132-3.967 1.206-4.098 4.098-.057 1.232-.069 1.626-.069 4.801 0 3.176.012 3.57.069 4.802.132 2.903 1.206 3.967 4.098 4.098 1.232.057 1.626.069 4.802.069 3.176 0 3.57-.012 4.801-.069 2.903 
-                    c1.232-.057 1.626-.069 4.801-.069 3.176 0 3.57.012 4.802.069 2.903.132 3.967 1.206 4.098 4.098.057 1.232.069 1.626.069 4.801 0 3.176-.012 3.57-.069 4.802-.132 2.903-1.206 3.967-4.098 4.098-1.232.057-1.626.069-4.802.069zM12 5.517c3.568 0 3.98.013 5.394.075 3.195.148 5.163 1.956 5.397 5.397.062 1.414.075 1.826.075 5.394 0 3.568-.013 3.98-.075 5.394-.234 3.441-2.202 5.25-5.397 5.397-1.414.062-1.826.075-5.394.075-3.568 0-3.98-.013-5.394-.075-3.195-.148-5.163-1.956-5.397-5.397-.062-1.414-.075-1.826-.075-5.394 0-3.568.013-3.98.075-5.394.234-3.441 2.202-5.25 5.397-5.397 1.414-.062 1.826-.075 5.394-.075zM12 7.625c-2.43 0-4.375 1.945-4.375 4.375s1.945 4.375 4.375 4.375 4.375-1.945 4.375-4.375-1.945-4.375-4.375-4.375zm0 7.42c-1.685 0-3.045-1.36-3.045-3.045s1.36-3.045 3.045-3.045 3.045 1.36 3.045 3.045-1.36 3.045-3.045 3.045zm5.727-8.086c.61 0 1.104.493 1.104 1.104s-.494 1.104-1.104 1.104-1.104-.494-1.104-1.104.494-1.104 1.104-1.104z"/></svg>
+                <a href="https://www.instagram.com/pick_topik/?igsh=YWU4NnEwMG1jdGk1#" target="_blank" class="hover:text-blue-400 transition" aria-label="Instagram">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-instagram">
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" x2="17.5" y1="6.5" y2="6.5"></line>
+                    </svg>
                 </a>
-                <a href="#" class="hover:text-white transition" aria-label="Telegram">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.181 8.216c.15.485-.233.916-.628.718l-3.327-1.61c-.42-.204-.816-.01-1.077.348l-1.98 2.64-4.23-1.328c-.46-.145-.92-.016-1.17.387-.25.402-.036.877.424 1.022l2.97 1.018c.55.188.805.57.85 1.144l.21 2.894c.06.827.818 1.096 1.364.385l.775-1.114c.28-.403.627-.61.996-.583l2.843.896c.55.176 1.08-.236 1.08-.82l.006-6.62c.002-.54-.265-.89-.785-1.05z"/></svg>
-                </a>
-                <a href="#" class="hover:text-white transition" aria-label="YouTube">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M21.543 6.495c-.328-1.298-1.34-2.31-2.638-2.638C17.514 3.5 12 3.5 12 3.5s-5.514 0-6.805.357c-1.298.328-2.31 1.34-2.638 2.638C3.5 7.846 3.5 12 3.5 12s0 4.154.357 5.445c.328 1.298 1.34 2.31 2.638 2.638C6.486 20.5 12 20.5 12 20.5s5.514 0 6.805-.357c1.298-.328 2.31-1.34 2.638-2.638C20.5 16.154 20.5 12 20.5 12s0-4.154-.357-5.445zM10 16.142V7.858L16.275 12 10 16.142z"/></svg>
-                </a>
-            </div>
-            
-            <div class="text-center md:text-right">
-                <p class="font-medium text-white mb-2">Контакты:</p>
-                <p>+7 701 XXX XX XX (Казахстан)</p>
-                <p>pick.edu.korea@gmail.com</p>
-            </div>
-        </div>
-    </footer>
-    
-    <div id="ctaModal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full relative">
-            <button id="closeModalBtn" class="absolute top-3 right-3 text-gray-700 hover:text-gray-900 text-3xl font-light leading-none">&times;</button>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Записаться на Бесплатную Консультацию</h3>
-            <p class="text-gray-600 mb-6">Получите индивидуальный план поступления и узнайте свой реальный шанс на грант в Корее.</p>
-
-            <form id="consultationForm" class="space-y-4">
-                <div>
-                    <input type="text" id="modalName" placeholder="Ваше Имя" class="modal-input-style" required>
-                </div>
-                <div>
-                    <input type="tel" id="modalPhone" placeholder="Ваш Телефон (WhatsApp)" class="modal-input-style" required>
-                </div>
-                <div>
-                    <input type="email" id="modalEmail" placeholder="Ваш Email" class="modal-input-style">
-                </div>
-                <button type="submit" id="modalSubmitBtn" class="w-full px-5 py-3 cta-button text-lg rounded-lg shadow-md mt-4 flex items-center justify-center">
-                    <span id="modalButtonText">Получить бесплатный план</span>
-                    <div id="modalLoader" class="hidden ml-3 spinner border-white border-t-white"></div>
-                </button>
-                <p id="modalMessage" class="mt-3 text-center text-sm text-green-600 hidden"></p>
-            </form>
-            <p class="mt-4 text-xs text-gray-500 text-center">
-                Нажимая на кнопку, вы соглашаетесь с обработкой персональных данных.
-            </p>
-        </div>
-    </div>
-    
-    <script>
-        // Modal functionality
-        const modal = document.getElementById('ctaModal');
-        const openModalBtns = document.querySelectorAll('#navOpenModalBtn, #heroOpenModalBtn, #footerOpenModalBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const form = document.getElementById('consultationForm');
-        const modalSubmitBtn = document.getElementById('modalSubmitBtn');
-        const modalButtonText = document.getElementById('modalButtonText');
-        const modalLoader = document.getElementById('modalLoader');
-        const modalMessage = document.getElementById('modalMessage');
-
-        openModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling
-            });
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-            document.body.style.overflow = ''; // Restore scrolling
-        });
-
-        // Close when clicking outside the modal content
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-        });
-
-        // Mock form submission (replace with actual API call)
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Disable button and show loader
-            modalSubmitBtn.disabled = true;
-            modalButtonText.textContent = 'Отправка...';
-            modalLoader.classList.remove('hidden');
-            modalMessage.classList.add('hidden');
-
-            setTimeout(() => {
-                // Mock success state
-                modalSubmitBtn.disabled = false;
-                modalButtonText.textContent = 'Получить бесплатный план';
-                modalLoader.classList.add('hidden');
-                modalMessage.textContent = '✅ Заявка успешно отправлена! Мы свяжемся с вами в течение 30 минут.';
-                modalMessage.classList.remove('hidden');
-                form.reset();
                 
-                // Close modal after a short delay
-                setTimeout(() => {
-                     modal.classList.add('hidden');
-                     document.body.style.overflow = '';
-                     modalMessage.classList.add('hidden');
-                }, 3000);
+                <a href="https://wa.me/77764392660" target="_blank" class="hover:text-green-400 transition" aria-label="WhatsApp">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle">
+                        <path d="M7.9 20A9.3 9.3 0 0 1 4 16.1L2 22l6-2"></path>
+                        <path d="M19 19a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14z"></path>
+                    </svg>
+                </a>
+            </div>
+    </footer>
 
-            }, 2000); // 2-second mock delay
-        });
-        
-        // AI Coordinator LLM Integration (UPDATED FOR TOOL CALL)
+
+    <script>
+        // --- AI Coordinator Elements ---
+        const targetMajorInput = document.getElementById('targetMajor');
+        const currentTOPIKInput = document.getElementById('currentTOPIK');
+        const currentGPAInput = document.getElementById('currentGPA');
+        const currentAchievementsInput = document.getElementById('currentAchievements');
         const evaluateButton = document.getElementById('evaluateButton');
-        const resultOutputContainer = document.getElementById('resultOutputContainer');
         const resultOutput = document.getElementById('resultOutput');
-        const loader = document.getElementById('loader');
+        const resultOutputContainer = document.getElementById('resultOutputContainer');
         const buttonText = document.getElementById('buttonText');
-
-        evaluateButton.addEventListener('click', async function() {
-            const targetMajor = document.getElementById('targetMajor').value.trim();
-            const currentTOPIK = document.getElementById('currentTOPIK').value.trim();
-            const currentGPA = document.getElementById('currentGPA').value.trim();
-            const currentAchievements = document.getElementById('currentAchievements').value.trim();
-
-            if (!targetMajor || !currentTOPIK || !currentGPA || !currentAchievements) {
+        const loader = document.getElementById('loader');
+        
+        // --- API Configuration ---
+        // !!! REPLACE "YOUR_GEMINI_API_KEY_HERE" WITH YOUR ACTUAL GEMINI API KEY !!!
+        const apiKey = "YOUR_GEMINI_API_KEY_HERE"; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        
+        // --- AI Coordinator Logic ---
+        
+        async function runLLMEvaluation() {
+            // Main function for AI evaluation logic
+            const major = targetMajorInput.value.trim();
+            const topik = currentTOPIKInput.value.trim();
+            const gpa = currentGPAInput.value.trim();
+            const achievements = currentAchievementsInput.value.trim();
+            
+            if (!major || !topik || !gpa || !achievements) {
+                resultOutput.textContent = "Пожалуйста, заполните все поля. Для проведения серьезного анализа нужны полные данные.";
                 resultOutputContainer.classList.remove('hidden');
-                resultOutput.innerHTML = `<span class="text-red-400 font-bold">⚠️ Внимание:</span> Пожалуйста, заполните все поля для точной оценки.`;
-                resultOutputContainer.style.borderColor = '#ef4444';
                 return;
             }
-            
-            // Show loading state
+
             evaluateButton.disabled = true;
-            buttonText.textContent = 'Оцениваем...';
+            buttonText.textContent = "Проводим глубокий анализ...";
             loader.classList.remove('hidden');
             resultOutputContainer.classList.add('hidden');
-            resultOutput.innerHTML = '';
-            resultOutputContainer.style.borderColor = '#3b82f6'; // Reset border color
+            resultOutput.textContent = '';
+            
+            // NEW SYSTEM PROMPT: Updated Sections 3 and 4 as per user request
+            const systemPrompt = `
+Вы — строгий, реалистичный и стратегический AI-координатор PICK. Ваша цель — предоставить студенту максимально честный и реалистичный анализ его шансов на получение стипендии (100% гранта или 70% скидки) в Корее. **Полностью исключите любое упоминание об английском языке или экзаменах IELTS/TOEFL из вашего анализа.**
 
-            const userData = `
-Major: ${targetMajor}
-TOPIK: ${currentTOPIK}
-GPA: ${currentGPA}
-Achievements: ${currentAchievements}
+Ваш ответ должен быть структурирован в четыре обязательных раздела:
+
+### 1. Реалистичная Оценка Шансов (Самостоятельное Поступление)
+* Оцените, что шансы студента на 100% грант при самостоятельной подаче в ТОП-5 университеты (SNU, Yonsei, Korea, KAIST, POSTECH) без профессиональной подготовки составляют не более **10-20%**.
+* Объясните, что даже при высоком TOPIK **${topik}** и GPA **${gpa}**, **конкуренция за стипендию** в Южной Корее — это не только баллы, но и безупречность документов (Motivational Letter, Study Plan, Recommendation Letters), а также **высочайший уровень владения корейским языком, который не ограничивается только оценкой TOPIK.**
+* Строго подчеркните, что достижения (**${achievements}**) должны быть идеально представлены, иначе они бесполезны.
+
+### 2. Повышение Шансов с Программой PICK
+* Заявите, что с программой PICK шансы увеличиваются до **70-85%** (для 70%-100% гранта).
+* Объясните, почему:
+    * **Гарантия TOPIK:** PICK обеспечивает всестороннее обучение корейскому языку, гарантируя не только успешную сдачу TOPIK на высокий балл, но и **свободное владение, необходимое для академической среды.**
+    * **2-летняя структура:** Мы не готовим за 3 месяца, а создаем профайл 2 года, включая помощь в организации волонтёрства и сборе сертификатов.
+    * **Специализация Эссе:** Идеальная подача достижения **${achievements}** и GPA **${gpa}** в Motivational Letter, адаптированная под каждый ВУЗ.
+    * **Стратегический Выбор:** Использование нашей внутренней базы данных для выбора ВУЗов, которые **реально ищут** студентов, подходящих под профиль **${major}**.
+
+### 3. Стратегический Список Университетов (Максимальный Грант)
+* На основе данных: TOPIK **${topik}**, GPA **${gpa}**, Достижения **${achievements}** и Специальность **${major}**, предложите **3-4 университета**, которые не относятся к "недостижимому" ТОП-3, но максимально щедры на гранты для студентов с сильной корейской подготовкой и профилем.
+* **Используйте ТОЛЬКО этот список (без объяснения, что это именно TOPIK-гранты):** Chung-Ang University (CAU), Dongguk University, Inha University, Pusan National University (PNU).
+* Для каждого ВУЗа укажите, почему он стратегически выгоден (например, сильное инженерное направление, расположен в Сеуле, низкая конкуренция за стипендию по сравнению с SKY).
+
+---
+
+### 4. Дорожная Карта PICK: Ваш 2-летний Путь к Успеху 🗺️
+**Этот раздел является вашим пошаговым планом, который PICK реализует для каждого студента. Он показывает, как мы превращаем ваш текущий потенциал в 100% грант.**
+
+| Этап и Период | Фокус | Детали и Задачи |
+| :--- | :--- | :--- |
+| **🟢 ЭТАП 1: Интенсивное Изучение Языка (Первый Год)** | | |
+| Месяцы 1–6 | База и TOPIK I (Уровни 1-2) | Изучение основ грамматики и лексики. Ежедневная практика. |
+| Месяцы 7–12 | TOPIK II (Уровни 3-4+) | Углубленное изучение академической грамматики. Интенсивная подготовка к секции "Письмо". **Сдача официального экзамена TOPIK.** |
+| **🟡 ЭТАП 2: Академическая Подготовка (Второй Год, Начало)** | | |
+| Месяцы 13–18 | Специализация и GPA | Фокусировка на профильных предметах. Прохождение дополнительных курсов/олимпиад, связанных с выбранной специальностью. |
+| Параллельно | Портфолио и Сертификаты | **Активная работа над профайлом**: участие в волонтёрстве, сбор сертификатов и наград. |
+| **🔴 ЭТАП 3: Документы и Стратегическое Эссе (Второй Год, Середина)** | | |
+| Месяцы 19–21 | Академические Документы | Запрос выписок. **Апостилирование** или легализация ВСЕХ необходимых документов. |
+| Месяцы 21 | Мотивационное Письмо (ML) и SP | Написание и редактирование финальных версий **Мотивационного Письма** и **Учебного Плана**. |
+| **🟣 ЭТАП 4: Интервью, Подача и Отъезд (Второй Год, Конец)** | | |
+| Месяцы 22 | Подготовка к Интервью | Интенсивная подготовка к собеседованию (чаще всего на корейском), фокусировка на вопросах по специальности. |
+| Месяцы 23 | Финальная Подача | Обучение правильной **онлайн и офлайн подаче** документов. |
+| Месяцы 24 | Зачисление и Виза | Получение уведомления о зачислении на грант. Планирование отъезда. |
 `;
             
-            const systemInstruction = `
-You are the 'PICK AI-Coordinator,' an expert educational consultant specializing in securing 100% scholarship grants to South Korean universities. Your goal is to provide a highly structured, personalized analysis to qualify a prospective student and showcase the value of the PICK EdTech program.
-
-The user will provide their Desired Major, Current TOPIK Level, GPA, and Key Achievements.
-
-Your response MUST be in Russian, formatted using Markdown, and strictly follow these four sections in order. Do not include any introductory or concluding text outside of these four numbered sections.
-
-## 1. Реалистичная Оценка (Без PICK)
-* State the chance is only 10-20%.
-* Explain that top Korean universities (even those offering grants) look for much more than just good scores/TOPIK. They require a compelling, highly developed profile (extracurriculars, leadership, unique stories) that most students cannot build alone.
-
-## 2. Улучшенные Шансы (С PICK)
-* State that with the 2-year PICK program, chances increase to **70-85%**.
-* Explain that PICK provides the structured, step-by-step guidance needed to build a winning profile: from TOPIK mastery and extracurricular strategy to polished application documents, ensuring they stand out in the hyper-competitive Korean admissions pool.
-
-## 3. Стратегический Список Университетов
-* Recommend 3-4 specific universities that are a **strategic fit** for the student's current profile and major goal.
-* The list must be selected from: Chung-Ang University, Dongguk University, Inha University, Pusan National University.
-* For each university, briefly explain why it is a strategic and realistic target given their profile and the grant goal.
-
-## 4. Персональный 2-Годичный Роудмап
-* Provide a high-level timeline of the 2-year program (e.g., Months 1-6, Months 7-12, Months 13-18, Months 19-24).
-* Structure the roadmap based on the PICK program pillars: TOPIK, Profile Building, Documents/Interview, and Final Application.
-`;
+            const userQuery = `Проведи анализ. Мои данные: Специальность: ${major}. Текущий TOPIK: ${topik}. GPA: ${gpa}. Достижения: ${achievements}. Мне нужно понять мои реальные шансы и увидеть, как PICK может их повысить.`;
             
-            try {
-                const toolResult = await google.generate_content({
-                    model: 'gemini-2.5-flash',
-                    contents: userData,
-                    system_instruction: systemInstruction
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                tools: [{ "google_search": {} }], // Use search for grounding on current university data
+            };
+            
+            let attempts = 0;
+            const maxAttempts = 3;
+            const initialDelay = 1000;
+
+            const makeApiCall = async () => {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-                
-                const aiResponse = toolResult.text;
-                
-                // Display result, converting newlines for better display
-                resultOutputContainer.classList.remove('hidden');
-                // Use innerHTML and a simple replace to handle markdown and newlines
-                resultOutput.innerHTML = aiResponse.replace(/\n/g, '<br>');
-                
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                resultOutput.innerHTML = `<span class="text-red-400 font-bold">⚠️ Произошла ошибка:</span> Не удалось получить оценку от AI-Координатора. Попробуйте обновить страницу.`;
-                resultOutputContainer.classList.remove('hidden');
-                resultOutputContainer.style.borderColor = '#ef4444';
-            } finally {
-                // Restore UI state
-                evaluateButton.disabled = false;
-                buttonText.textContent = 'Оценить шансы и получить план';
-                loader.classList.add('hidden');
+
+                if (response.ok) {
+                    return response.json();
+                }
+
+                // Handle server errors or rate limiting by retrying
+                throw new Error(`API call failed with status: ${response.status}`);
+            };
+
+            while (attempts < maxAttempts) {
+                try {
+                    const result = await makeApiCall();
+                    
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Ошибка: Не удалось получить ответ от AI. Попробуйте еще раз.";
+
+                    resultOutput.textContent = text;
+                    resultOutputContainer.classList.remove('hidden');
+                    
+                    // Cleanup
+                    evaluateButton.disabled = false;
+                    buttonText.textContent = "Получить Реалистичный Анализ";
+                    loader.classList.add('hidden');
+
+                    return; // Exit successfully
+
+                } catch (error) {
+                    attempts++;
+                    console.error(`Attempt ${attempts} failed:`, error.message);
+                    if (attempts >= maxAttempts) {
+                        resultOutput.textContent = "Извините, произошла ошибка связи с аналитической системой. Пожалуйста, попробуйте позже или не теряйте время — запишитесь на консультацию сейчас.";
+                        resultOutputContainer.classList.remove('hidden');
+                        
+                        // Cleanup on final failure
+                        evaluateButton.disabled = false;
+                        buttonText.textContent = "Получить Реалистичный Анализ";
+                        loader.classList.add('hidden');
+                        
+                        return;
+                    }
+                    // Exponential backoff
+                    const delay = initialDelay * Math.pow(2, attempts - 1);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
             }
-        });
+        }
+        
+        // Attach listener for the AI button
+        if (evaluateButton) {
+            evaluateButton.addEventListener('click', runLLMEvaluation);
+        }
 
-        // Smooth scrolling logic
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const targetId = this.getAttribute('href');
-                
-                if (targetId === '#') {
-                    e.preventDefault();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    return; 
-                }
-
-                e.preventDefault();
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                } else {
-                    console.error('Target element not found for ID: ' + targetId);
-                }
-            });
-        });
     </script>
+
+
 </body>
 </html>
