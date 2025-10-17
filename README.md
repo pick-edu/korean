@@ -132,7 +132,7 @@
             <nav class="space-x-6 hidden sm:block font-medium">
                 <a href="#process" class="text-white hover:text-blue-400 transition">Процесс</a>
                 <a href="#ai-coordinator" class="text-white hover:text-blue-400 transition">AI-Координатор 🎯</a>
-                <a href="#prize" class="text-white hover:text-blue-400 transition">Авиабилеты ✈️</a>
+                <a href="#prize" class="text-white hover:text-blue-400 transition">Спонсорство от PICK ✈️</a>
             </nav>
             <a href="https://docs.google.com/forms/d/e/1FAIpQLSfVxNrfayVQuPa5MRNCPeyZI9GVcbfDg0KitNgAwAT3CkEiCw/viewform?usp=dialog" target="_blank" 
                class="px-5 py-2 cta-button text-sm rounded-lg shadow-md hidden sm:block flex items-center justify-center">
